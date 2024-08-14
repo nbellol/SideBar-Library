@@ -2,21 +2,20 @@
 import { useState } from 'react';
 import { ExpandMore, ChevronRight} from '@mui/icons-material';
 import { Document } from '../sidebar/sidebar';
+import  Folder  from '../folder/folder';
 import File from '../file/file';
 
 import './folder.css';
 
-interface FolderProps {
+interface ParentFolderProps {
     document: Document;
-    level: number;
-    hidden: string[];
-    setHidden: (hidden: string[]) => void;
-    maxLevel: number;
-    setmaxLevel: (maxLevel: number) => void;
   }
   
-const Folder: React.FC<FolderProps> = ({ document,level,hidden,setHidden, maxLevel,setmaxLevel }) => {
+const ParentFolder: React.FC<ParentFolderProps> = ({ document }) => {
     const [open, setOpen] = useState(false);
+    let level = 1;
+    const [maxLevel, setMaxLevel] = useState(1);
+    const [hidden, setHidden] = useState<string[]>([]);
     const renderChildren = (doc: Document) => {
         return doc.children.map((doc) => {
             if(doc.type === 'document') {
@@ -29,7 +28,7 @@ const Folder: React.FC<FolderProps> = ({ document,level,hidden,setHidden, maxLev
                     hidden={hidden}
                     setHidden={setHidden}
                     maxLevel={maxLevel}
-                    setmaxLevel={setmaxLevel}
+                    setmaxLevel={setMaxLevel}
                     />;
           });
     }
@@ -45,9 +44,9 @@ const Folder: React.FC<FolderProps> = ({ document,level,hidden,setHidden, maxLev
     const handleFolderClick = () => {
         if(open){
             const difference = maxLevel - level;
-            setmaxLevel(maxLevel - difference);
+            setMaxLevel(maxLevel - difference);
         } else {
-            setmaxLevel(maxLevel + 1)
+            setMaxLevel(maxLevel + 1)
         }
         setOpen(!open); 
         
@@ -75,4 +74,4 @@ const Folder: React.FC<FolderProps> = ({ document,level,hidden,setHidden, maxLev
     )
 
 }
-export default Folder;
+export default ParentFolder;

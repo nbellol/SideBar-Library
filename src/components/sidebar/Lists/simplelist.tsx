@@ -53,4 +53,10 @@ export const simplelist = [
         'id': "9",
         'parents': ['8'],
     },
+    {
+        'mimeType': "/google-apps.document",
+        'name': "Document 2",
+        'id': "10",
+        'parents': ['1'],
+    },
 ];

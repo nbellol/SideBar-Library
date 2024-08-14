@@ -3,9 +3,13 @@
     flex-direction: row;
     justify-content: left;
     align-items: center;
+    padding-top: 4px;
+    padding-bottom: 4px;
 }
 .fileTittle {
     font-size: 14px;
     color: #000000;
-    margin-left: 10%;
+    margin-left: 8%;
+    margin-top: 0;
+    margin-bottom: 0;
 }

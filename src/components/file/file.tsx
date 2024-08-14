@@ -9,7 +9,7 @@ interface FileProps {
   
 const File: React.FC<FileProps> = ({ document }) => {
     return (
-        <div className="File">
+        <div className="file">
             <p className='fileTittle'>{document.name}</p>
         </div>
     )

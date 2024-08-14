@@ -1,4 +1,4 @@
-export const simplelist = [
+export const doublelist = [
     {
         'mimeType': "/google-apps.folder",
         'name': "Folder 1",

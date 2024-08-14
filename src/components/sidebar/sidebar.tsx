@@ -2,8 +2,9 @@
 import { useState } from 'react';
 import { doclist } from './Lists/doclist';
 import { simplelist } from './Lists/simplelist';
+import {doublelist} from './Lists/doubleList';
 import './sidebar.css';
-import Folder from '../folder/folder';
+import ParentFolder from '../folder/parentFolder';
 
 export interface Document {
     type: string;
@@ -15,10 +16,7 @@ export interface Document {
 
 const Sidebar: React.FC = () => {
     const root = "1QLSNL1QhMMHJmDVFyTXoQ2V6RBtc8mjx";
-    const dict:Document[] = []
-    let level = 0;
-    const [maxLevel, setMaxLevel] = useState(1);
-    const [hidden, setHidden] = useState<string[]>([]);
+    const dict:Document[] = [];
     const hierarchy: Document = {
       type: "folder",
       name: "root",
@@ -27,7 +25,7 @@ const Sidebar: React.FC = () => {
       children: [],
     }
     const processList = () => {
-        simplelist.map((doc) => {
+      doclist.map((doc) => {
             let document = {
               type: doc.mimeType.split('google-apps.')[1],
               name: doc.name,
@@ -53,13 +51,8 @@ const Sidebar: React.FC = () => {
         <div className="mainSidebar">
           Hello
           {hierarchy.children.map((doc) => {
-            return <Folder 
+            return <ParentFolder 
                       document={doc}
-                      level={level+1}
-                      hidden={hidden}
-                      setHidden={setHidden}
-                      maxLevel={maxLevel}
-                      setmaxLevel={setMaxLevel}
                     />;
           }) }
         </div>
