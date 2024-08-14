@@ -1,0 +1,11 @@
+.file {
+    display: flex;
+    flex-direction: row;
+    justify-content: left;
+    align-items: center;
+}
+.fileTittle {
+    font-size: 14px;
+    color: #000000;
+    margin-left: 10%;
+}
