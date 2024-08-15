@@ -13,6 +13,7 @@ export interface Document {
     parent: string|null;
     children: Document[];
 }
+export const MAX_NUMBER_LEVELS = 6
 
 const Sidebar: React.FC = () => {
     const root = "1QLSNL1QhMMHJmDVFyTXoQ2V6RBtc8mjx";
@@ -24,8 +25,10 @@ const Sidebar: React.FC = () => {
       parent: null,
       children: [],
     }
+    const [selected, setSelected] = useState("");
+    const hidden: number[] = [];
     const processList = () => {
-      doclist.map((doc) => {
+      doublelist.map((doc) => {
             let document = {
               type: doc.mimeType.split('google-apps.')[1],
               name: doc.name,
@@ -53,8 +56,12 @@ const Sidebar: React.FC = () => {
           {hierarchy.children.map((doc) => {
             return <ParentFolder 
                       document={doc}
+                      selected={selected}
+                      setSelected={setSelected}
+                      hidden={hidden}
                     />;
           }) }
+          {selected}
         </div>
     )
 

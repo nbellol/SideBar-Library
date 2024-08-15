@@ -1,7 +1,7 @@
 'use client'
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ExpandMore, ChevronRight} from '@mui/icons-material';
-import { Document } from '../sidebar/sidebar';
+import { Document, MAX_NUMBER_LEVELS } from '../sidebar/sidebar';
 import File from '../file/file';
 
 import './folder.css';
@@ -9,67 +9,98 @@ import './folder.css';
 interface FolderProps {
     document: Document;
     level: number;
-    hidden: string[];
-    setHidden: (hidden: string[]) => void;
+    hidden: number[];
     maxLevel: number;
     setmaxLevel: (maxLevel: number) => void;
+    selected: string;
+    setSelected: (selected: string) => void;
   }
-  
-const Folder: React.FC<FolderProps> = ({ document,level,hidden,setHidden, maxLevel,setmaxLevel }) => {
+
+const Folder: React.FC<FolderProps> = ({ document,level,hidden, maxLevel,setmaxLevel, selected, setSelected}) => {
     const [open, setOpen] = useState(false);
     const renderChildren = (doc: Document) => {
         return doc.children.map((doc) => {
             if(doc.type === 'document') {
-                return <File document={doc}/>;
+                return <File
+                document={doc}
+                selected={selected}
+                setSelected={setSelected}
+                />;
             }
-            
-            return <Folder 
+
+            return <Folder
                     document={doc}
                     level={level+1}
                     hidden={hidden}
-                    setHidden={setHidden}
                     maxLevel={maxLevel}
                     setmaxLevel={setmaxLevel}
+                    selected={selected}
+                    setSelected={setSelected}
                     />;
           });
     }
+    useEffect(() => {
+        if(level >= maxLevel) {
+            setOpen(false);
+        }
+    },[maxLevel]);
 
-    const renderHide = () => { 
+
+
+    const renderHide = () => {
+        
+        console.log(hidden)
         if (level === 1) {
+            const difference = maxLevel - level;
             return (
-            <div className="hidden">... </div>
+            <div className="hidden" onClick={() => setmaxLevel(difference)}>... </div>
             )
         }
         return null;
     }
-    const handleFolderClick = () => {
+    const handleFolderClick = (doc: Document) => {
+        if(open){
+            const difference = maxLevel - level;
+            setmaxLevel(maxLevel - difference +  1);
+            setSelected(doc.id+'-'+doc.name);
+        } else {
+            setSelected(doc.id+'-'+doc.name);
+            setmaxLevel(maxLevel + 1)
+
+        }
+        setOpen(true)
+
+
+    }
+    const handleChevronClick = () => {
         if(open){
             const difference = maxLevel - level;
             setmaxLevel(maxLevel - difference);
-        } else {
+        }else{
             setmaxLevel(maxLevel + 1)
         }
-        setOpen(!open); 
-        
+        setOpen(!open);
+
     }
-    const hideLevel = maxLevel - level > 5;
+    const hideLevel = maxLevel - level >= MAX_NUMBER_LEVELS || hidden.indexOf(level)>0;
 
 
     return (
         <>
-        { hideLevel ? 
+        { hideLevel ?
         renderHide()
         :
-        <div className="folder" onClick={() => handleFolderClick()}>
-            {open ? 
-            <ExpandMore/> 
+        <div className="folder" >
+            <div onClick={() => handleChevronClick()}>{open ?
+            <ExpandMore/>
             : <ChevronRight/>}
-            <p className='folderTittle'>{document.name}{"-"+level}{"-"+maxLevel}</p>
-        </div> 
+            </div>
+            <p className='folderTittle' onClick={() => handleFolderClick(document)}>{document.name}{"-"+level}{"-"+maxLevel}</p>
+        </div>
         }
         <div style={{paddingLeft: hideLevel? '0' : '5%'}}>
             {open && renderChildren(document)
-            } 
+            }
         </div>
         </>
     )
