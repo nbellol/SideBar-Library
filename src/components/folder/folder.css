@@ -18,6 +18,7 @@
     font-variation-settings: "wdth" 100;
     overflow-wrap: break-word;
     margin: 0;
+    cursor: pointer;
 }
 
 .hidden {
