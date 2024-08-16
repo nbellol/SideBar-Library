@@ -1,18 +1,19 @@
 'use client'
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { ExpandMore, ChevronRight} from '@mui/icons-material';
 import { Document } from '../sidebar/sidebar';
 import  Folder  from '../folder/folder';
 import File from '../file/file';
 import { MAX_NUMBER_LEVELS } from '../sidebar/sidebar';
 import './folder.css';
-import { render } from 'react-dom';
 
 interface ParentFolderProps {
     document: Document;
     selected: string;
     setSelected: (selected: string) => void;
     hidden: number[]
+    maxLevel: number;
+    setMaxLevel: (maxLevel: number) => void;
   }
 export interface hiddenOptions{
     level: number;
@@ -24,10 +25,10 @@ interface position {
     y: number;
 }
   
-const ParentFolder: React.FC<ParentFolderProps> = ({ document,selected, setSelected,hidden }) => {
+const ParentFolder: React.FC<ParentFolderProps> = ({ document,selected, setSelected,hidden, maxLevel, setMaxLevel }) => {
     const [open, setOpen] = useState(false);
     let level = 1;
-    const [maxLevel, setMaxLevel] = useState(1);
+    
     const [hiddenOptions, setHiddenOptions] = useState<hiddenOptions[]>([]);
     const [position, setPosition] = useState<position>({x: 0, y: 0});
     const [openPopUp, setOpenPopUp] = useState(false);
@@ -68,7 +69,6 @@ const ParentFolder: React.FC<ParentFolderProps> = ({ document,selected, setSelec
             const HandleHiddenClick = (e: React.MouseEvent<HTMLDivElement>) => {
                 setPosition({x: e.clientX, y: e.clientY});
                 setOpenPopUp(true);
-                console.log(hiddenOptions);
             };
             return (
             <div className="hidden" onClick={(e) => HandleHiddenClick(e)}>... </div>
@@ -79,6 +79,7 @@ const ParentFolder: React.FC<ParentFolderProps> = ({ document,selected, setSelec
     const renderPopUp = () => {
         const handelOptionClick = (option: hiddenOptions) => {
             setMaxLevel(MAX_NUMBER_LEVELS + (option.level-1));
+            setSelected(option.name);
             const index = hiddenOptions.findIndex(opt => opt.name === option.name);
             const tempHiddenOptions = [...hiddenOptions].slice(0,index);
             setHiddenOptions(tempHiddenOptions);
@@ -93,15 +94,13 @@ const ParentFolder: React.FC<ParentFolderProps> = ({ document,selected, setSelec
         )
     }
     const handleFolderClick = (doc : Document) => {
-        if(open){
-            const difference = maxLevel - level;
-            setMaxLevel(maxLevel - difference +  1);
+        if(level< maxLevel){
             setSelected(doc.id+'-'+doc.name);
         } else {
             setSelected(doc.id+'-'+doc.name);
             setMaxLevel(maxLevel + 1)
-            setOpen(true);
         }
+        setOpen(true);
     }
 
     const handleChevronClick = () => {

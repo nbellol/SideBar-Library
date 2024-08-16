@@ -44,6 +44,7 @@ const Folder: React.FC<FolderProps> = ({ document,level,hidden, maxLevel,setmaxL
                     />;
           });
     }
+
     useEffect(() => {
         if(level >= maxLevel) {
             setOpen(false);
@@ -66,9 +67,7 @@ const Folder: React.FC<FolderProps> = ({ document,level,hidden, maxLevel,setmaxL
         return null;
     }
     const handleFolderClick = (doc: Document) => {
-        if(open){
-            const difference = maxLevel - level;
-            setmaxLevel(maxLevel - difference +  1);
+        if(level< maxLevel){
             setSelected(doc.id+'-'+doc.name);
         } else {
             setSelected(doc.id+'-'+doc.name);

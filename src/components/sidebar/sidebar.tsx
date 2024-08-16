@@ -17,6 +17,7 @@ export const MAX_NUMBER_LEVELS = 6
 
 const Sidebar: React.FC = () => {
     const root = "1QLSNL1QhMMHJmDVFyTXoQ2V6RBtc8mjx";
+    const [maxLevel, setMaxLevel] = useState(1);
     const dict:Document[] = [];
     const hierarchy: Document = {
       type: "folder",
@@ -59,6 +60,8 @@ const Sidebar: React.FC = () => {
                       selected={selected}
                       setSelected={setSelected}
                       hidden={hidden}
+                      maxLevel={maxLevel}
+                      setMaxLevel={setMaxLevel} 
                     />;
           }) }
           {selected}
