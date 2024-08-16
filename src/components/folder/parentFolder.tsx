@@ -77,10 +77,17 @@ const ParentFolder: React.FC<ParentFolderProps> = ({ document,selected, setSelec
         return null;
     }
     const renderPopUp = () => {
+        const handelOptionClick = (option: hiddenOptions) => {
+            setMaxLevel(MAX_NUMBER_LEVELS + (option.level-1));
+            const index = hiddenOptions.findIndex(opt => opt.name === option.name);
+            const tempHiddenOptions = [...hiddenOptions].slice(0,index);
+            setHiddenOptions(tempHiddenOptions);
+            setOpenPopUp(false);
+        }
         return (
             <div className='popUp' style={{top: position.y, left: position.x}}>
                 {hiddenOptions.map(option => {
-                    return <div className='popUpOption'>{option.name}</div>
+                    return <div className='popUpOption' onClick={() => handelOptionClick(option)}>{option.name}</div>
                 })}
             </div>
         )
