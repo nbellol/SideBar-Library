@@ -5,6 +5,7 @@ import { Document, MAX_NUMBER_LEVELS } from '../sidebar/sidebar';
 import File from '../file/file';
 
 import './folder.css';
+import { hiddenOptions } from './parentFolder';
 
 interface FolderProps {
     document: Document;
@@ -14,9 +15,11 @@ interface FolderProps {
     setmaxLevel: (maxLevel: number) => void;
     selected: string;
     setSelected: (selected: string) => void;
+    hiddenOptions: hiddenOptions[];
+    setHiddenOptions: (hiddenOptions: hiddenOptions[]) => void;
   }
 
-const Folder: React.FC<FolderProps> = ({ document,level,hidden, maxLevel,setmaxLevel, selected, setSelected}) => {
+const Folder: React.FC<FolderProps> = ({ document,level,hidden, maxLevel,setmaxLevel, selected, setSelected, hiddenOptions, setHiddenOptions}) => {
     const [open, setOpen] = useState(false);
     const renderChildren = (doc: Document) => {
         return doc.children.map((doc) => {
@@ -36,6 +39,8 @@ const Folder: React.FC<FolderProps> = ({ document,level,hidden, maxLevel,setmaxL
                     setmaxLevel={setmaxLevel}
                     selected={selected}
                     setSelected={setSelected}
+                    hiddenOptions={hiddenOptions}
+                    setHiddenOptions={setHiddenOptions} 
                     />;
           });
     }
@@ -49,7 +54,9 @@ const Folder: React.FC<FolderProps> = ({ document,level,hidden, maxLevel,setmaxL
 
     const renderHide = () => {
         
-        console.log(hidden)
+        if(hiddenOptions.find(option => option.name === document.name) === undefined){
+            setHiddenOptions([...hiddenOptions, {level: level, name: document.name}])
+        }
         if (level === 1) {
             const difference = maxLevel - level;
             return (
