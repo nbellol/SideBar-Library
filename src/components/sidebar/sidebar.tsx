@@ -13,6 +13,10 @@ export interface Document {
     parent: string|null;
     children: Document[];
 }
+export interface levelDocument extends Document{
+  level: number;
+  parentId: string
+}
 export const MAX_NUMBER_LEVELS = 6
 
 const Sidebar: React.FC = () => {
@@ -26,7 +30,7 @@ const Sidebar: React.FC = () => {
       parent: null,
       children: [],
     }
-    const [selected, setSelected] = useState("");
+    const [selected, setSelected] = useState<levelDocument|null>(null);
     const hidden: number[] = [];
     const processList = () => {
       doublelist.map((doc) => {
@@ -64,7 +68,7 @@ const Sidebar: React.FC = () => {
                       setMaxLevel={setMaxLevel} 
                     />;
           }) }
-          {selected}
+          {selected && selected.id + "-" + selected.name + "-" + selected.level}
         </div>
     )
 

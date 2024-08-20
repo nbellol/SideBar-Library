@@ -1,17 +1,20 @@
 'use client'
-import { Document } from '../sidebar/sidebar';
+import { Document, levelDocument } from '../sidebar/sidebar';
 
 import './file.css';
 
 interface FileProps {
     document: Document;
-    selected: string;
-    setSelected: (selected: string) => void;
+    selected: levelDocument|null;
+    setSelected: (selected: levelDocument|null) => void;
+    level: number;
+    parentId: string;
   }
   
-const File: React.FC<FileProps> = ({ document,selected,setSelected }) => {
+const File: React.FC<FileProps> = ({ document,selected,setSelected, level, parentId }) => {
     const handleClick = (doc: Document) => {
-        setSelected(doc.id+'-'+doc.name)
+        const levelDoc: levelDocument= {...doc, 'level': level, 'parentId': parentId};
+        setSelected(levelDoc);
     }
     return (
         <div className="file" onClick={() => handleClick(document)}>

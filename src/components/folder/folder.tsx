@@ -5,7 +5,7 @@ import { Document, MAX_NUMBER_LEVELS } from '../sidebar/sidebar';
 import File from '../file/file';
 
 import './folder.css';
-import { hiddenOptions } from './parentFolder';
+import { levelDocument } from '../sidebar/sidebar';
 
 interface FolderProps {
     document: Document;
@@ -13,13 +13,14 @@ interface FolderProps {
     hidden: number[];
     maxLevel: number;
     setmaxLevel: (maxLevel: number) => void;
-    selected: string;
-    setSelected: (selected: string) => void;
-    hiddenOptions: hiddenOptions[];
-    setHiddenOptions: (hiddenOptions: hiddenOptions[]) => void;
+    selected: levelDocument|null;
+    setSelected: (selected: levelDocument|null) => void;
+    hiddenOptions: levelDocument[];
+    setHiddenOptions: (hiddenOptions: levelDocument[]) => void;
+    parentId: string;
   }
 
-const Folder: React.FC<FolderProps> = ({ document,level,hidden, maxLevel,setmaxLevel, selected, setSelected, hiddenOptions, setHiddenOptions}) => {
+const Folder: React.FC<FolderProps> = ({ document,level,hidden, maxLevel,setmaxLevel, selected, setSelected, hiddenOptions, setHiddenOptions, parentId}) => {
     const [open, setOpen] = useState(false);
     const renderChildren = (doc: Document) => {
         return doc.children.map((doc) => {
@@ -28,6 +29,8 @@ const Folder: React.FC<FolderProps> = ({ document,level,hidden, maxLevel,setmaxL
                 document={doc}
                 selected={selected}
                 setSelected={setSelected}
+                level={level+1}
+                parentId={parentId}
                 />;
             }
 
@@ -41,6 +44,7 @@ const Folder: React.FC<FolderProps> = ({ document,level,hidden, maxLevel,setmaxL
                     setSelected={setSelected}
                     hiddenOptions={hiddenOptions}
                     setHiddenOptions={setHiddenOptions} 
+                    parentId={parentId}
                     />;
           });
     }
@@ -55,41 +59,33 @@ const Folder: React.FC<FolderProps> = ({ document,level,hidden, maxLevel,setmaxL
 
     const renderHide = () => {
         
-        if(hiddenOptions.find(option => option.name === document.name) === undefined){
-            setHiddenOptions([...hiddenOptions, {level: level, name: document.name}])
-        }
-        if (level === 1) {
-            const difference = maxLevel - level;
-            return (
-            <div className="hidden" onClick={() => setmaxLevel(difference)}>... </div>
-            )
+        if(hiddenOptions.find(option => option.id === document.id) === undefined){
+            const levelDoc: levelDocument= {...document, 'level': level, 'parentId': parentId};
+            setHiddenOptions([...hiddenOptions, levelDoc])
         }
         return null;
     }
     const handleFolderClick = (doc: Document) => {
         if(level< maxLevel){
-            setSelected(doc.id+'-'+doc.name);
+            const levelDoc: levelDocument= {...doc, 'level': level, 'parentId': parentId};
+            setSelected(levelDoc);
         } else {
-            setSelected(doc.id+'-'+doc.name);
+            const levelDoc: levelDocument= {...doc, 'level': level, 'parentId': parentId};
+            setSelected(levelDoc);
             setmaxLevel(maxLevel + 1)
-
         }
         setOpen(true)
-
-
     }
     const handleChevronClick = () => {
         if(open){
-            const difference = maxLevel - level;
-            setmaxLevel(maxLevel - difference);
-        }else{
+            setmaxLevel(level);
+        }else if(level >= maxLevel){
             setmaxLevel(maxLevel + 1)
         }
         setOpen(!open);
 
-    }
+    } 
     const hideLevel = maxLevel - level >= MAX_NUMBER_LEVELS || hidden.indexOf(level)>0;
-
 
     return (
         <>
