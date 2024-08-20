@@ -14,8 +14,7 @@ interface ParentFolderProps {
     hidden: number[]
     maxLevel: number;
     setMaxLevel: (maxLevel: number) => void;
-  }
-
+}
 
 interface position {
     x: number;
@@ -58,9 +57,6 @@ const ParentFolder: React.FC<ParentFolderProps> = ({ document,selected, setSelec
 
     
     const renderHide = () => {
-        // if(hidden.indexOf(level)<0 ){
-        //     hidden.push(level)
-        // }
         if(hiddenOptions.find(option => option.id === document.id) === undefined){
             const levelDoc: levelDocument= {...document, 'level': level, 'parentId': parentId};
             setHiddenOptions([...hiddenOptions, levelDoc])
@@ -101,8 +97,12 @@ const ParentFolder: React.FC<ParentFolderProps> = ({ document,selected, setSelec
     }
     const renderHiddenChild = () => {
         const padding = maxLevel*10;
+        const handleClick = () => {
+            setMaxLevel(selected ? selected.level: 1);
+        }
+
         return (
-            <div className="hiddenChild" style={{paddingLeft: selected ? padding + 'px' : '20px'}}>... ({selected?.name}) </div>
+            <div className="hiddenChild" onClick={() => handleClick()} style={{paddingLeft: selected ? padding + 'px' : '20px'}}>... ({selected?.name}) </div>
         )
     }
 

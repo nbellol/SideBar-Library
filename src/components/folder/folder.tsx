@@ -53,6 +53,9 @@ const Folder: React.FC<FolderProps> = ({ document,level,hidden, maxLevel,setmaxL
         if(level >= maxLevel) {
             setOpen(false);
         }
+        else {
+            setOpen(true);
+        }
     },[maxLevel]);
 
 
