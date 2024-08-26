@@ -37,7 +37,7 @@ export const doublelist = [
     },
     {
         'mimeType': "/google-apps.folder",
-        'name': "Folder 7",
+        'name': "!Folder 7",
         'id': "7",
         'parents': ['6'],
     },

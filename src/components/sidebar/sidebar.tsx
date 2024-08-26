@@ -12,6 +12,7 @@ export interface Document {
     id: string;
     parent: string|null;
     children: Document[];
+    isSoftRoot: boolean;
 }
 export interface levelDocument extends Document{
   level: number;
@@ -29,17 +30,21 @@ const Sidebar: React.FC = () => {
       id: root,
       parent: null,
       children: [],
+      isSoftRoot: false,
     }
     const [selected, setSelected] = useState<levelDocument|null>(null);
+    const [softRoot, setSoftRoot] = useState<Document|null>(null);
     const hidden: number[] = [];
     const processList = () => {
       doublelist.map((doc) => {
             let document = {
+              isSoftRoot: doc.name.includes('!'),
               type: doc.mimeType.split('google-apps.')[1],
-              name: doc.name,
+              name: doc.name.includes('!')? doc.name.replace('!','') : doc.name,
               id: doc.id,
               parent: doc.parents[0], 
-              children: []};
+              children: [],
+            };
             dict.push(document);
         });
     }
@@ -66,6 +71,8 @@ const Sidebar: React.FC = () => {
                       hidden={hidden}
                       maxLevel={maxLevel}
                       setMaxLevel={setMaxLevel} 
+                      softRoot={softRoot}
+                      setSoftRoot={setSoftRoot} 
                     />;
           }) }
           {selected && selected.id + "-" + selected.name + "-" + selected.level}

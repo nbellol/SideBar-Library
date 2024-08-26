@@ -18,9 +18,13 @@ interface FolderProps {
     hiddenOptions: levelDocument[];
     setHiddenOptions: (hiddenOptions: levelDocument[]) => void;
     parentId: string;
+    softRoot: Document|null;
+    setSoftRoot: (softRoot: Document|null) => void;
+    localMaxLevel: number;
+    setLocalMaxLevel: (maxLevel: number) => void;
   }
 
-const Folder: React.FC<FolderProps> = ({ document,level,hidden, maxLevel,setmaxLevel, selected, setSelected, hiddenOptions, setHiddenOptions, parentId}) => {
+const Folder: React.FC<FolderProps> = ({ document,level,hidden, maxLevel,setmaxLevel, selected, setSelected, hiddenOptions, setHiddenOptions, parentId, softRoot, setSoftRoot, setLocalMaxLevel, localMaxLevel}) => {
     const [open, setOpen] = useState(false);
     const renderChildren = (doc: Document) => {
         return doc.children.map((doc) => {
@@ -45,18 +49,22 @@ const Folder: React.FC<FolderProps> = ({ document,level,hidden, maxLevel,setmaxL
                     hiddenOptions={hiddenOptions}
                     setHiddenOptions={setHiddenOptions} 
                     parentId={parentId}
+                    softRoot={softRoot}
+                    setSoftRoot={setSoftRoot}
+                    localMaxLevel={localMaxLevel}
+                    setLocalMaxLevel={setLocalMaxLevel}
                     />;
           });
     }
 
     useEffect(() => {
-        if(level >= maxLevel) {
+        if(level >= localMaxLevel) {
             setOpen(false);
         }
         else {
             setOpen(true);
         }
-    },[maxLevel]);
+    },[localMaxLevel]);
 
 
 
@@ -75,21 +83,24 @@ const Folder: React.FC<FolderProps> = ({ document,level,hidden, maxLevel,setmaxL
         } else {
             const levelDoc: levelDocument= {...doc, 'level': level, 'parentId': parentId};
             setSelected(levelDoc);
-            setmaxLevel(maxLevel + 1)
+            setLocalMaxLevel(localMaxLevel + 1)
         }
         setOpen(true)
     }
     const handleChevronClick = () => {
         if(open){
-            setmaxLevel(level);
-        }else if(level >= maxLevel){
-            setmaxLevel(maxLevel + 1)
+            setLocalMaxLevel(level);
+            setmaxLevel(1);
+        }else if(level >= localMaxLevel){
+            setLocalMaxLevel(localMaxLevel + 1)
         }
         setOpen(!open);
 
     } 
     const hideLevel = maxLevel - level >= MAX_NUMBER_LEVELS || hidden.indexOf(level)>0;
-
+    if(document.isSoftRoot){
+        console.log('softRoot', document)
+    }
     return (
         <>
         { hideLevel ?

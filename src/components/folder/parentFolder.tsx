@@ -14,6 +14,8 @@ interface ParentFolderProps {
     hidden: number[]
     maxLevel: number;
     setMaxLevel: (maxLevel: number) => void;
+    softRoot: Document|null;
+    setSoftRoot: (softRoot: Document|null) => void;
 }
 
 interface position {
@@ -21,11 +23,20 @@ interface position {
     y: number;
 }
   
-const ParentFolder: React.FC<ParentFolderProps> = ({ document,selected, setSelected,hidden, maxLevel, setMaxLevel }) => {
+const ParentFolder: React.FC<ParentFolderProps> = ({ 
+    document,
+    selected, 
+    setSelected,
+    hidden, 
+    maxLevel, 
+    setMaxLevel,
+    softRoot,
+    setSoftRoot, }) => {
     const [open, setOpen] = useState(false);
     let level = 1;
     const parentId = document.id;
     const [hiddenOptions, setHiddenOptions] = useState<levelDocument[]>([]);
+    const [localMaxLevel, setLocalMaxLevel] = useState(1);
     const [position, setPosition] = useState<position>({x: 0, y: 0});
     const [openPopUp, setOpenPopUp] = useState(false);
     const renderChildren = (doc: Document) => {
@@ -51,6 +62,10 @@ const ParentFolder: React.FC<ParentFolderProps> = ({ document,selected, setSelec
                     hiddenOptions={hiddenOptions}
                     setHiddenOptions={setHiddenOptions}
                     parentId={parentId}
+                    softRoot={softRoot}
+                    setSoftRoot={setSoftRoot}
+                    localMaxLevel={localMaxLevel}
+                    setLocalMaxLevel={setLocalMaxLevel}
                     />;
           });
     }
@@ -61,6 +76,7 @@ const ParentFolder: React.FC<ParentFolderProps> = ({ document,selected, setSelec
             const levelDoc: levelDocument= {...document, 'level': level, 'parentId': parentId};
             setHiddenOptions([...hiddenOptions, levelDoc])
         }
+        
 
         if (level === 1) {
             const HandleHiddenClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -75,7 +91,8 @@ const ParentFolder: React.FC<ParentFolderProps> = ({ document,selected, setSelec
     }
     const renderPopUp = () => {
         const handelOptionClick = (option: levelDocument) => {
-            setMaxLevel(MAX_NUMBER_LEVELS + (option.level-1));
+            setLocalMaxLevel(MAX_NUMBER_LEVELS + (option.level-1));
+            setMaxLevel(1);
             setSelected(option);
             const index = hiddenOptions.findIndex(opt => opt.name === option.name);
             const tempHiddenOptions = [...hiddenOptions].slice(0,index);
@@ -95,9 +112,33 @@ const ParentFolder: React.FC<ParentFolderProps> = ({ document,selected, setSelec
             </div>
         )
     }
+    const renderSoftRoot = () => {
+        return (
+            <>  
+                {renderHide()}
+                <Folder 
+                    document={document}
+                    level={level+1}
+                    hidden={hidden}
+                    maxLevel={maxLevel}
+                    setmaxLevel={setMaxLevel}
+                    selected={selected}
+                    setSelected={setSelected}
+                    hiddenOptions={hiddenOptions}
+                    setHiddenOptions={setHiddenOptions}
+                    parentId={parentId}
+                    softRoot={softRoot}
+                    setSoftRoot={setSoftRoot}
+                    localMaxLevel={localMaxLevel}
+                    setLocalMaxLevel={setLocalMaxLevel}
+                    />;
+            </>
+        )
+    }
     const renderHiddenChild = () => {
-        const padding = maxLevel*10;
+        const padding = localMaxLevel*10;
         const handleClick = () => {
+            setLocalMaxLevel(selected ? selected.level: 1);
             setMaxLevel(selected ? selected.level: 1);
         }
 
@@ -107,30 +148,32 @@ const ParentFolder: React.FC<ParentFolderProps> = ({ document,selected, setSelec
     }
 
     const handleFolderClick = (doc : Document) => {
-        if(level< maxLevel){
+        if(level< localMaxLevel){
             const levelDoc: levelDocument= {...doc, 'level': level, 'parentId': parentId};
             setSelected(levelDoc);
         } else {
             const levelDoc: levelDocument= {...doc, 'level': level, 'parentId': parentId};
             setSelected(levelDoc);
-            setMaxLevel(maxLevel + 1)
+            setLocalMaxLevel(localMaxLevel + 1)
         }
         setOpen(true);
     }
 
     const handleChevronClick = () => {
         if(open){
-            setMaxLevel(level);
+            setLocalMaxLevel(level);
         }else if(level >= maxLevel){
-            setMaxLevel(maxLevel + 1)
+            setLocalMaxLevel(localMaxLevel + 1)
         }
         setOpen(!open);
 
     } 
+    if(maxLevel !== localMaxLevel && localMaxLevel - level >= MAX_NUMBER_LEVELS){
+        setMaxLevel(localMaxLevel);
+    } 
 
-    const hideLevel = maxLevel - level >= MAX_NUMBER_LEVELS || hidden.indexOf(level) >=0;
-    const hiddenChild =  selected &&selected.level > maxLevel && selected.parentId === parentId; 
-    console.log(maxLevel,selected)
+    const hideLevel = maxLevel - level >= MAX_NUMBER_LEVELS;
+    const hiddenChild =  selected &&selected.level > localMaxLevel && selected.parentId === parentId; 
 
     return (
         <>
@@ -142,7 +185,7 @@ const ParentFolder: React.FC<ParentFolderProps> = ({ document,selected, setSelec
             <ExpandMore/>
             : <ChevronRight/>}
             </div>
-            <p className='folderTittle' onClick={() => handleFolderClick(document)}>{document.name}{"-"+level}{"-"+maxLevel}</p>
+            <p className='folderTittle' onClick={() => handleFolderClick(document)}>{document.name}{"-"+localMaxLevel}{"-"+maxLevel}</p>
         </div>
         }
         <div style={{paddingLeft: hideLevel? '0' : '5%'}}>
