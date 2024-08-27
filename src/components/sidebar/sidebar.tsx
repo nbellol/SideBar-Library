@@ -33,7 +33,7 @@ const Sidebar: React.FC = () => {
       isSoftRoot: false,
     }
     const [selected, setSelected] = useState<levelDocument|null>(null);
-    const [softRoot, setSoftRoot] = useState<Document|null>(null);
+    const [softRoot, setSoftRoot] = useState<levelDocument|null>(null);
     const hidden: number[] = [];
     const processList = () => {
       doublelist.map((doc) => {

@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react';
-import { ExpandMore, ChevronRight} from '@mui/icons-material';
+import { ExpandMore, ChevronRight, Sort} from '@mui/icons-material';
 import { Document, levelDocument } from '../sidebar/sidebar';
 import  Folder  from '../folder/folder';
 import File from '../file/file';
@@ -14,8 +14,8 @@ interface ParentFolderProps {
     hidden: number[]
     maxLevel: number;
     setMaxLevel: (maxLevel: number) => void;
-    softRoot: Document|null;
-    setSoftRoot: (softRoot: Document|null) => void;
+    softRoot: levelDocument|null;
+    setSoftRoot: (softRoot: levelDocument|null) => void;
 }
 
 interface position {
@@ -36,10 +36,16 @@ const ParentFolder: React.FC<ParentFolderProps> = ({
     let level = 1;
     const parentId = document.id;
     const [hiddenOptions, setHiddenOptions] = useState<levelDocument[]>([]);
+    const [breadcrumb, setBreadcrumb] = useState<levelDocument[]>([]);
     const [localMaxLevel, setLocalMaxLevel] = useState(1);
     const [position, setPosition] = useState<position>({x: 0, y: 0});
     const [openPopUp, setOpenPopUp] = useState(false);
     const renderChildren = (doc: Document) => {
+        if(breadcrumb.find(option => option.id === document.id) === undefined){
+            const levelDoc: levelDocument= {...document, 'level': level, 'parentId': parentId};
+            setBreadcrumb([...breadcrumb, levelDoc])
+        }
+        
         return doc.children.map((doc) => {
             if(doc.type === 'document') {
                 return <File 
@@ -66,10 +72,12 @@ const ParentFolder: React.FC<ParentFolderProps> = ({
                     setSoftRoot={setSoftRoot}
                     localMaxLevel={localMaxLevel}
                     setLocalMaxLevel={setLocalMaxLevel}
+                    breadcrumb={breadcrumb}
+                    setBreadcrumb={setBreadcrumb}
                     />;
           });
     }
-
+    
     
     const renderHide = () => {
         if(hiddenOptions.find(option => option.id === document.id) === undefined){
@@ -91,13 +99,14 @@ const ParentFolder: React.FC<ParentFolderProps> = ({
     }
     const renderPopUp = () => {
         const handelOptionClick = (option: levelDocument) => {
-            setLocalMaxLevel(MAX_NUMBER_LEVELS + (option.level-1));
+            setLocalMaxLevel(breadcrumb.length < MAX_NUMBER_LEVELS ? option.level+1 : MAX_NUMBER_LEVELS + (option.level-1));
             setMaxLevel(1);
             setSelected(option);
             const index = hiddenOptions.findIndex(opt => opt.name === option.name);
             const tempHiddenOptions = [...hiddenOptions].slice(0,index);
             setHiddenOptions(tempHiddenOptions);
             setOpenPopUp(false);
+            setSoftRoot(null);
         }
 
         const handleMouseLeave = () => {
@@ -106,35 +115,13 @@ const ParentFolder: React.FC<ParentFolderProps> = ({
         }
         return (
             <div className='popUp' style={{top: position.y, left: position.x}} onMouseLeave={() => handleMouseLeave()}>
-                {hiddenOptions.map(option => {
+                {hiddenOptions.sort((a,b) => a.name.localeCompare(b.name)).map(option => {
                     return <div className='popUpOption' onClick={() => handelOptionClick(option)}>{option.name}</div>
                 })}
             </div>
         )
     }
-    const renderSoftRoot = () => {
-        return (
-            <>  
-                {renderHide()}
-                <Folder 
-                    document={document}
-                    level={level+1}
-                    hidden={hidden}
-                    maxLevel={maxLevel}
-                    setmaxLevel={setMaxLevel}
-                    selected={selected}
-                    setSelected={setSelected}
-                    hiddenOptions={hiddenOptions}
-                    setHiddenOptions={setHiddenOptions}
-                    parentId={parentId}
-                    softRoot={softRoot}
-                    setSoftRoot={setSoftRoot}
-                    localMaxLevel={localMaxLevel}
-                    setLocalMaxLevel={setLocalMaxLevel}
-                    />;
-            </>
-        )
-    }
+    
     const renderHiddenChild = () => {
         const padding = localMaxLevel*10;
         const handleClick = () => {
@@ -158,10 +145,13 @@ const ParentFolder: React.FC<ParentFolderProps> = ({
         }
         setOpen(true);
     }
-
+    
     const handleChevronClick = () => {
         if(open){
             setLocalMaxLevel(level);
+            const index = breadcrumb.findIndex(opt => opt.name === document.name);
+            const tempBreadcrums = [...breadcrumb].slice(0,index);
+            setBreadcrumb(tempBreadcrums);
         }else if(level >= maxLevel){
             setLocalMaxLevel(localMaxLevel + 1)
         }
@@ -172,12 +162,12 @@ const ParentFolder: React.FC<ParentFolderProps> = ({
         setMaxLevel(localMaxLevel);
     } 
 
-    const hideLevel = maxLevel - level >= MAX_NUMBER_LEVELS;
+    const levelcondition = maxLevel - level >= MAX_NUMBER_LEVELS;
+    const hideLevel = levelcondition ||(softRoot !== null && document.id !== softRoot.id)
     const hiddenChild =  selected &&selected.level > localMaxLevel && selected.parentId === parentId; 
-
     return (
         <>
-        { hideLevel ?
+        { hideLevel  ?
         renderHide()
         :
         <div className="folder" >

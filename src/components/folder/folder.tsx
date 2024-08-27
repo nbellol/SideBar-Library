@@ -18,15 +18,21 @@ interface FolderProps {
     hiddenOptions: levelDocument[];
     setHiddenOptions: (hiddenOptions: levelDocument[]) => void;
     parentId: string;
-    softRoot: Document|null;
-    setSoftRoot: (softRoot: Document|null) => void;
+    softRoot: levelDocument|null;
+    setSoftRoot: (softRoot: levelDocument|null) => void;
     localMaxLevel: number;
     setLocalMaxLevel: (maxLevel: number) => void;
+    breadcrumb: levelDocument[];
+    setBreadcrumb: (hiddenOptions: levelDocument[]) => void;
   }
 
-const Folder: React.FC<FolderProps> = ({ document,level,hidden, maxLevel,setmaxLevel, selected, setSelected, hiddenOptions, setHiddenOptions, parentId, softRoot, setSoftRoot, setLocalMaxLevel, localMaxLevel}) => {
+const Folder: React.FC<FolderProps> = ({ document,level,hidden, maxLevel,setmaxLevel, selected, setSelected, hiddenOptions, setHiddenOptions, parentId, softRoot, setSoftRoot, setLocalMaxLevel, localMaxLevel, breadcrumb, setBreadcrumb}) => {
     const [open, setOpen] = useState(false);
     const renderChildren = (doc: Document) => {
+        if(breadcrumb.find(option => option.id === document.id) === undefined){
+            const levelDoc: levelDocument= {...document, 'level': level, 'parentId': parentId};
+            setBreadcrumb([...breadcrumb, levelDoc])
+        }
         return doc.children.map((doc) => {
             if(doc.type === 'document') {
                 return <File
@@ -53,6 +59,8 @@ const Folder: React.FC<FolderProps> = ({ document,level,hidden, maxLevel,setmaxL
                     setSoftRoot={setSoftRoot}
                     localMaxLevel={localMaxLevel}
                     setLocalMaxLevel={setLocalMaxLevel}
+                    breadcrumb={breadcrumb}
+                    setBreadcrumb={setBreadcrumb}
                     />;
           });
     }
@@ -67,7 +75,7 @@ const Folder: React.FC<FolderProps> = ({ document,level,hidden, maxLevel,setmaxL
     },[localMaxLevel]);
 
 
-
+    console.log(breadcrumb)
     const renderHide = () => {
         
         if(hiddenOptions.find(option => option.id === document.id) === undefined){
@@ -77,6 +85,10 @@ const Folder: React.FC<FolderProps> = ({ document,level,hidden, maxLevel,setmaxL
         return null;
     }
     const handleFolderClick = (doc: Document) => {
+        if(document.isSoftRoot){
+            const levelDoc: levelDocument= {...document, 'level': level, 'parentId': parentId};
+            setSoftRoot(levelDoc);
+        }
         if(level< maxLevel){
             const levelDoc: levelDocument= {...doc, 'level': level, 'parentId': parentId};
             setSelected(levelDoc);
@@ -91,16 +103,22 @@ const Folder: React.FC<FolderProps> = ({ document,level,hidden, maxLevel,setmaxL
         if(open){
             setLocalMaxLevel(level);
             setmaxLevel(1);
+            const index = breadcrumb.findIndex(opt => opt.name === document.name);
+            const tempBreadcrums = [...breadcrumb].slice(0,index);
+            setBreadcrumb(tempBreadcrums);
         }else if(level >= localMaxLevel){
             setLocalMaxLevel(localMaxLevel + 1)
         }
         setOpen(!open);
 
     } 
-    const hideLevel = maxLevel - level >= MAX_NUMBER_LEVELS || hidden.indexOf(level)>0;
-    if(document.isSoftRoot){
-        console.log('softRoot', document)
+    const levelcondition = maxLevel - level >= MAX_NUMBER_LEVELS || hidden.indexOf(level)>0;
+    const isChildSoft = softRoot !== null && level > softRoot.level && parentId === softRoot.parentId;
+    let hideLevel = levelcondition ||(softRoot !== null && document.id !== softRoot.id);
+    if(isChildSoft){ 
+        hideLevel = false;
     }
+
     return (
         <>
         { hideLevel ?
