@@ -116,7 +116,8 @@ const ParentFolder: React.FC<ParentFolderProps> = ({
             setHiddenOptions(tempHiddenOptions);
             setOpenPopUp(false);
             setSoftRoot(null);
-            const tempOpenedChildren = [...openedChildren].filter(opt => opt.level <= option.level);    
+            const tempOpenedChildren = [...openedChildren].filter(opt => opt.level <= (MAX_NUMBER_LEVELS ? option.level+1 : MAX_NUMBER_LEVELS + (option.level-1)));    
+            console.log('SET')
             setOpenedChildren([...tempOpenedChildren]);
         }   
 
@@ -143,7 +144,7 @@ const ParentFolder: React.FC<ParentFolderProps> = ({
             <div className="hiddenChild" onClick={() => handleClick()} style={{paddingLeft: selected ? padding + 'px' : '20px'}}>... ({selected?.name}) </div>
         )
     }
-
+    console.log(openedChildren)
     // ----------------------------------------------
     // ---------------  HANDLER FUNCTIONS -----------
     // ----------------------------------------------
