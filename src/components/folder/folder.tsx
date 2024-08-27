@@ -74,8 +74,6 @@ const Folder: React.FC<FolderProps> = ({ document,level,hidden, maxLevel,setmaxL
         }
     },[localMaxLevel]);
 
-
-    console.log(breadcrumb)
     const renderHide = () => {
         
         if(hiddenOptions.find(option => option.id === document.id) === undefined){
@@ -95,7 +93,9 @@ const Folder: React.FC<FolderProps> = ({ document,level,hidden, maxLevel,setmaxL
         } else {
             const levelDoc: levelDocument= {...doc, 'level': level, 'parentId': parentId};
             setSelected(levelDoc);
-            setLocalMaxLevel(localMaxLevel + 1)
+            if(!open){
+                setLocalMaxLevel(localMaxLevel + 1)
+            }
         }
         setOpen(true)
     }

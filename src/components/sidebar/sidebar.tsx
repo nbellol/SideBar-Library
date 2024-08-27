@@ -1,7 +1,7 @@
 'use client'
 import { useState } from 'react';
 import { doclist } from './Lists/doclist';
-import { simplelist } from './Lists/simplelist';
+import { doublecomplex } from './Lists/doublecomplex';
 import {doublelist} from './Lists/doubleList';
 import './sidebar.css';
 import ParentFolder from '../folder/parentFolder';
@@ -36,7 +36,7 @@ const Sidebar: React.FC = () => {
     const [softRoot, setSoftRoot] = useState<levelDocument|null>(null);
     const hidden: number[] = [];
     const processList = () => {
-      doublelist.map((doc) => {
+      doublecomplex.map((doc) => {
             let document = {
               isSoftRoot: doc.name.includes('!'),
               type: doc.mimeType.split('google-apps.')[1],
