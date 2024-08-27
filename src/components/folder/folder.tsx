@@ -24,9 +24,30 @@ interface FolderProps {
     setLocalMaxLevel: (maxLevel: number) => void;
     breadcrumb: levelDocument[];
     setBreadcrumb: (hiddenOptions: levelDocument[]) => void;
+    openedChildren: levelDocument[];
+    setOpenedChildren: (openedChildren: levelDocument[]) => void;
   }
 
-const Folder: React.FC<FolderProps> = ({ document,level,hidden, maxLevel,setmaxLevel, selected, setSelected, hiddenOptions, setHiddenOptions, parentId, softRoot, setSoftRoot, setLocalMaxLevel, localMaxLevel, breadcrumb, setBreadcrumb}) => {
+const Folder: React.FC<FolderProps> = ({ 
+    document,
+    level,
+    hidden,
+    maxLevel,
+    setmaxLevel, 
+    selected, 
+    setSelected,
+    hiddenOptions, 
+    setHiddenOptions, 
+    parentId, 
+    softRoot, 
+    setSoftRoot, 
+    setLocalMaxLevel, 
+    localMaxLevel, 
+    breadcrumb, 
+    setBreadcrumb,
+    openedChildren,
+    setOpenedChildren,
+    }) => {
     const [open, setOpen] = useState(false);
     const renderChildren = (doc: Document) => {
         if(breadcrumb.find(option => option.id === document.id) === undefined){
@@ -61,16 +82,20 @@ const Folder: React.FC<FolderProps> = ({ document,level,hidden, maxLevel,setmaxL
                     setLocalMaxLevel={setLocalMaxLevel}
                     breadcrumb={breadcrumb}
                     setBreadcrumb={setBreadcrumb}
+                    openedChildren={openedChildren}
+                    setOpenedChildren={setOpenedChildren}  
                     />;
           });
     }
 
     useEffect(() => {
-        if(level >= localMaxLevel) {
-            setOpen(false);
-        }
-        else {
-            setOpen(true);
+        if(openedChildren.find(option => option.id === document.parent) === undefined){
+            if(level >= localMaxLevel) {
+                setOpen(false);
+            }
+            else {
+                setOpen(true);
+            }
         }
     },[localMaxLevel]);
 
@@ -97,6 +122,9 @@ const Folder: React.FC<FolderProps> = ({ document,level,hidden, maxLevel,setmaxL
                 setLocalMaxLevel(localMaxLevel + 1)
             }
         }
+        if(openedChildren.find(option => option.id === doc.id) === undefined){
+            setOpenedChildren([...openedChildren, {...doc, 'level': level, 'parentId': parentId}])
+        }
         setOpen(true)
     }
     const handleChevronClick = () => {
@@ -106,11 +134,18 @@ const Folder: React.FC<FolderProps> = ({ document,level,hidden, maxLevel,setmaxL
             const index = breadcrumb.findIndex(opt => opt.name === document.name);
             const tempBreadcrums = [...breadcrumb].slice(0,index);
             setBreadcrumb(tempBreadcrums);
+            const idxOC = openedChildren.findIndex(opt => opt.name === document.name);
+            const tempOpenedChildren = [...openedChildren].slice(0,idxOC);
+            setOpenedChildren(tempOpenedChildren);
         }else if(level >= localMaxLevel){
             setLocalMaxLevel(localMaxLevel + 1)
         }
+        if(!open){
+            if(openedChildren.find(option => option.id === document.id) === undefined){
+                setOpenedChildren([...openedChildren, {...document, 'level': level, 'parentId': parentId}])
+            }
+        }
         setOpen(!open);
-
     } 
     const levelcondition = maxLevel - level >= MAX_NUMBER_LEVELS || hidden.indexOf(level)>0;
     const isChildSoft = softRoot !== null && level > softRoot.level && parentId === softRoot.parentId;
