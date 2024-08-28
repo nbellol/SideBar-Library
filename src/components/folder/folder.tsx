@@ -48,7 +48,15 @@ const Folder: React.FC<FolderProps> = ({
     openedChildren,
     setOpenedChildren,
     }) => {
+    // ----------------------------------------------
+    // ---------------  STATE MANAGEMENT ------------
+    // ----------------------------------------------
     const [open, setOpen] = useState(false);
+
+    // ----------------------------------------------
+    // ---------------  RENDER FUNCTIONS ------------
+    // ----------------------------------------------
+    // Render the children depending on the tipe of document (folder or file)
     const renderChildren = (doc: Document) => {
         if(breadcrumb.find(option => option.id === document.id) === undefined){
             const levelDoc: levelDocument= {...document, 'level': level, 'parentId': parentId};
@@ -58,7 +66,6 @@ const Folder: React.FC<FolderProps> = ({
             if(doc.type === 'document') {
                 return <File
                 document={doc}
-                selected={selected}
                 setSelected={setSelected}
                 level={level+1}
                 parentId={parentId}
@@ -87,7 +94,19 @@ const Folder: React.FC<FolderProps> = ({
                     />;
           });
     }
-
+    // Manage the lists of hidden folders 
+    const renderHide = () => {
+        
+        if(hiddenOptions.find(option => option.id === document.id) === undefined){
+            const levelDoc: levelDocument= {...document, 'level': level, 'parentId': parentId};
+            setHiddenOptions([...hiddenOptions, levelDoc])
+        }
+        return null;
+    }
+    // ----------------------------------------------
+    // ---------------  USE EFFECTS ----------------
+    // ----------------------------------------------
+    // used to check if the folder should be open or closed based on the max level
     useEffect(() => {
         if(openedChildren.find(option => option.id === document.parent) === undefined){
             if(level >= localMaxLevel) {
@@ -99,14 +118,11 @@ const Folder: React.FC<FolderProps> = ({
         }
     },[localMaxLevel]);
 
-    const renderHide = () => {
-        
-        if(hiddenOptions.find(option => option.id === document.id) === undefined){
-            const levelDoc: levelDocument= {...document, 'level': level, 'parentId': parentId};
-            setHiddenOptions([...hiddenOptions, levelDoc])
-        }
-        return null;
-    }
+    // ----------------------------------------------
+    // ---------------  HANDLER FUNCTIONS -----------
+    // ----------------------------------------------
+    // On click of the folder tittle, the folder is selected and it is open to show its children
+    // If the folder is not in the opened children, it is added to the list
     const handleFolderClick = (doc: Document) => {
         if(document.isSoftRoot){
             const levelDoc: levelDocument= {...document, 'level': level, 'parentId': parentId};
@@ -127,6 +143,10 @@ const Folder: React.FC<FolderProps> = ({
         }
         setOpen(true)
     }
+    // On click of the chevron, if the folder is closed,it will open and show its children
+    // If the folder is open, it will close and remove its children from the opened
+    // children list
+    // The click in the chevron updates the max level shown but does not select the current folder
     const handleChevronClick = () => {
         if(open){
             setLocalMaxLevel(level);
@@ -146,7 +166,10 @@ const Folder: React.FC<FolderProps> = ({
             }
         }
         setOpen(!open);
-    } 
+    }
+    // ----------------------------------------------
+    // -------  MANAGE HIDDING CONDITIONS -----------
+    // ---------------------------------------------- 
     const levelcondition = maxLevel - level >= MAX_NUMBER_LEVELS || hidden.indexOf(level)>0;
     const isChildSoft = softRoot !== null && level > softRoot.level && parentId === softRoot.parentId;
     let hideLevel = levelcondition ||(softRoot !== null && document.id !== softRoot.id);

@@ -5,13 +5,21 @@ import './file.css';
 
 interface FileProps {
     document: Document;
-    selected: levelDocument|null;
     setSelected: (selected: levelDocument|null) => void;
     level: number;
     parentId: string;
   }
   
-const File: React.FC<FileProps> = ({ document,selected,setSelected, level, parentId }) => {
+const File: React.FC<FileProps> = ({ 
+    document,
+    setSelected,
+    level,
+    parentId
+    }) => {
+    // ----------------------------------------------
+    // ---------------  HANDLER FUNCTIONS -----------
+    // ----------------------------------------------   
+    // When clicking on a file, set the selected document
     const handleClick = (doc: Document) => {
         const levelDoc: levelDocument= {...doc, 'level': level, 'parentId': parentId};
         setSelected(levelDoc);
