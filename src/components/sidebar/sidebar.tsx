@@ -22,7 +22,15 @@ export const MAX_NUMBER_LEVELS = 6
 
 const Sidebar: React.FC = () => {
     const root = "1QLSNL1QhMMHJmDVFyTXoQ2V6RBtc8mjx";
+    // ----------------------------------------------
+    // ---------------  STATE MANAGEMENT ------------
+    // ----------------------------------------------
     const [maxLevel, setMaxLevel] = useState(1);
+    const [selected, setSelected] = useState<levelDocument|null>(null);
+    const [softRoot, setSoftRoot] = useState<levelDocument|null>(null);
+    // ----------------------------------------------
+    // ------------  HIERARCHY CREATION  ------------
+    // ----------------------------------------------
     const dict:Document[] = [];
     const hierarchy: Document = {
       type: "folder",
@@ -32,8 +40,6 @@ const Sidebar: React.FC = () => {
       children: [],
       isSoftRoot: false,
     }
-    const [selected, setSelected] = useState<levelDocument|null>(null);
-    const [softRoot, setSoftRoot] = useState<levelDocument|null>(null);
     const hidden: number[] = [];
     const processList = () => {
       doublecomplex.map((doc) => {
@@ -60,6 +66,10 @@ const Sidebar: React.FC = () => {
       });
     }
     generateHierarchy();
+
+    // ----------------------------------------------
+    // ----------------  RENDERING  -----------------
+    // ----------------------------------------------
     return (
         <div className="mainSidebar">
           Hello
