@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react';
 import { ExpandMore, ChevronRight} from '@mui/icons-material';
-import { Document, MAX_NUMBER_LEVELS } from '../sidebar/sidebar';
+import { Document, MAX_NUMBER_LEVELS, selectedDocument } from '../sidebar/sidebar';
 import File from '../file/file';
 
 import './folder.css';
@@ -13,8 +13,8 @@ interface FolderProps {
     hidden: number[];
     maxLevel: number;
     setmaxLevel: (maxLevel: number) => void;
-    selected: levelDocument|null;
-    setSelected: (selected: levelDocument|null) => void;
+    selected: selectedDocument|null;
+    setSelected: (selected: selectedDocument|null) => void;
     hiddenOptions: levelDocument[];
     setHiddenOptions: (hiddenOptions: levelDocument[]) => void;
     parentId: string;
@@ -23,7 +23,7 @@ interface FolderProps {
     localMaxLevel: number;
     setLocalMaxLevel: (maxLevel: number) => void;
     breadcrumb: levelDocument[];
-    setBreadcrumb: (hiddenOptions: levelDocument[]) => void;
+    setBreadcrumb: (breadcrumb: levelDocument[]) => void;
     openedChildren: levelDocument[];
     setOpenedChildren: (openedChildren: levelDocument[]) => void;
   }
@@ -58,17 +58,17 @@ const Folder: React.FC<FolderProps> = ({
     // ----------------------------------------------
     // Render the children depending on the tipe of document (folder or file)
     const renderChildren = (doc: Document) => {
-        if(breadcrumb.find(option => option.id === document.id) === undefined){
-            const levelDoc: levelDocument= {...document, 'level': level, 'parentId': parentId};
-            setBreadcrumb([...breadcrumb, levelDoc])
-        }
+        
         return doc.children.map((doc) => {
             if(doc.type === 'document') {
                 return <File
                 document={doc}
+                selected={selected}
                 setSelected={setSelected}
                 level={level+1}
                 parentId={parentId}
+                breadcrumb={breadcrumb}
+                setBreadcrumb={setBreadcrumb}
                 />;
             }
 
@@ -108,7 +108,7 @@ const Folder: React.FC<FolderProps> = ({
     // ----------------------------------------------
     // used to check if the folder should be open or closed based on the max level
     useEffect(() => {
-        if(openedChildren.find(option => option.id === document.parent) === undefined){
+        if (openedChildren.find(option => option.id === document.parent) === undefined){   
             if(level >= localMaxLevel) {
                 setOpen(false);
             }
@@ -116,7 +116,15 @@ const Folder: React.FC<FolderProps> = ({
                 setOpen(true);
             }
         }
-    },[localMaxLevel]);
+        if (selected?.breadcrumb.find(option => option.id === document.id) !== undefined){
+            if(level >= localMaxLevel) {
+                setOpen(false);
+            }
+            else {
+                setOpen(true);
+            }
+        } 
+    },[localMaxLevel, breadcrumb, openedChildren]);
 
     // ----------------------------------------------
     // ---------------  HANDLER FUNCTIONS -----------
@@ -130,13 +138,21 @@ const Folder: React.FC<FolderProps> = ({
         }
         if(level< maxLevel){
             const levelDoc: levelDocument= {...doc, 'level': level, 'parentId': parentId};
-            setSelected(levelDoc);
+            setSelected({...levelDoc, 'breadcrumb': breadcrumb});
         } else {
             const levelDoc: levelDocument= {...doc, 'level': level, 'parentId': parentId};
-            setSelected(levelDoc);
+            setSelected({...levelDoc, 'breadcrumb': breadcrumb});
             if(!open){
                 setLocalMaxLevel(localMaxLevel + 1)
             }
+        }
+        if(breadcrumb.length > level && selected !== null){
+            const tempBreadcrums = breadcrumb.filter(opt => opt.level <= level);
+            setBreadcrumb(tempBreadcrums);
+        }
+        if(breadcrumb.find(option => option.id === document.id) === undefined){
+            const levelDoc: levelDocument= {...document, 'level': level, 'parentId': parentId};
+            setBreadcrumb([...breadcrumb, levelDoc])
         }
         if(openedChildren.find(option => option.id === doc.id) === undefined){
             setOpenedChildren([...openedChildren, {...doc, 'level': level, 'parentId': parentId}])
@@ -151,18 +167,30 @@ const Folder: React.FC<FolderProps> = ({
         if(open){
             setLocalMaxLevel(level);
             setmaxLevel(1);
-            const index = breadcrumb.findIndex(opt => opt.name === document.name);
-            const tempBreadcrums = [...breadcrumb].slice(0,index);
-            setBreadcrumb(tempBreadcrums);
             const idxOC = openedChildren.findIndex(opt => opt.name === document.name);
             const tempOpenedChildren = [...openedChildren].slice(0,idxOC);
             setOpenedChildren(tempOpenedChildren);
+            const index = breadcrumb.findIndex(opt => opt.name === document.name);
+            let tempBreadcrums =[...breadcrumb]
+            tempBreadcrums.splice(index,1);
+            if(tempBreadcrums.length > level && selected && selected.level <= level){
+                tempBreadcrums = tempBreadcrums.filter(opt => opt.level <= level);
+            }
+            setBreadcrumb(tempBreadcrums);
         }else if(level >= localMaxLevel){
             setLocalMaxLevel(localMaxLevel + 1)
         }
         if(!open){
+            if(breadcrumb.length > level && selected !== null){
+                const tempBreadcrums = breadcrumb.filter(opt => opt.level <= level);
+                setBreadcrumb(tempBreadcrums);
+            }
             if(openedChildren.find(option => option.id === document.id) === undefined){
                 setOpenedChildren([...openedChildren, {...document, 'level': level, 'parentId': parentId}])
+            }
+            if(breadcrumb.find(option => option.id === document.id) === undefined){
+                const levelDoc: levelDocument= {...document, 'level': level, 'parentId': parentId};
+                setBreadcrumb([...breadcrumb, levelDoc])
             }
         }
         setOpen(!open);
@@ -187,7 +215,7 @@ const Folder: React.FC<FolderProps> = ({
             <ExpandMore/>
             : <ChevronRight/>}
             </div>
-            <p className='folderTittle' onClick={() => handleFolderClick(document)}>{document.name}{"-"+level}{"-"+maxLevel}</p>
+            <p className='folderTittle' onClick={() => handleFolderClick(document)}>{document.name}</p>
         </div>
         }
         <div style={{paddingLeft: hideLevel? '0' : '5%'}}>

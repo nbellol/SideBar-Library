@@ -18,6 +18,9 @@ export interface levelDocument extends Document{
   level: number;
   parentId: string
 }
+export interface selectedDocument extends levelDocument{
+  breadcrumb: levelDocument[];
+}
 export const MAX_NUMBER_LEVELS = 6
 
 const Sidebar: React.FC = () => {
@@ -26,7 +29,7 @@ const Sidebar: React.FC = () => {
     // ---------------  STATE MANAGEMENT ------------
     // ----------------------------------------------
     const [maxLevel, setMaxLevel] = useState(1);
-    const [selected, setSelected] = useState<levelDocument|null>(null);
+    const [selected, setSelected] = useState<selectedDocument|null>(null);
     const [softRoot, setSoftRoot] = useState<levelDocument|null>(null);
     // ----------------------------------------------
     // ------------  HIERARCHY CREATION  ------------
@@ -72,7 +75,6 @@ const Sidebar: React.FC = () => {
     // ----------------------------------------------
     return (
         <div className="mainSidebar">
-          Hello
           {hierarchy.children.map((doc) => {
             return <ParentFolder 
                       document={doc}
@@ -85,7 +87,6 @@ const Sidebar: React.FC = () => {
                       setSoftRoot={setSoftRoot} 
                     />;
           }) }
-          {selected && selected.id + "-" + selected.name + "-" + selected.level}
         </div>
     )
 
